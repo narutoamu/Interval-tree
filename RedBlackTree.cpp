@@ -73,19 +73,15 @@ public:
         
         if (y==NIL){
             root = now;
-            root-> maxi= now->high;
+
         }
         else if (now->low <  y->low){
                 y->left = now;
-                now-> maxi=now->high;
-                if(now-> maxi>y-> maxi)
-                 y-> maxi=now-> maxi;
+                
         }
         else{
             y->right = now;
-            now-> maxi=now->high;
-             if(now-> maxi>y-> maxi)
-                 y-> maxi=now-> maxi;
+           
         }
         
         
@@ -206,7 +202,7 @@ public:
         {
             if(x->low<=h&& l<=x->high)
                {
-                 cout<<"Overlaps with"<<x->low<<","<<x->high<<endl;
+                 cout<<"Overlaps with  "<<x->low<<","<<x->high<<endl;
                  return;
                  
                }
@@ -248,14 +244,7 @@ public:
         //connect y to x
         y->left = x;
         x->parent = y;
-          if(x->right==NIL)
-            x->right-> maxi=0;
-          if(x->left==NIL)
-            x->left-> maxi=0;
-            x-> maxi= max(x->high, max(x->right-> maxi,x->left-> maxi));
-          if(x-> maxi>y-> maxi)
-            y-> maxi=x-> maxi;
-
+          
      }
 
     
@@ -281,13 +270,7 @@ public:
         
         x->right = y;
         y->parent = x;
-        if(y->right==NIL)
-            y->right-> maxi=0;
-          if(y->left==NIL)
-            y->left-> maxi=0;
-            y-> maxi= max(y->high, max(y->right-> maxi,y->left-> maxi));
-          if(x-> maxi<y-> maxi)
-            x-> maxi=y-> maxi;
+        
     }
     
     void insert_fix(Node *x){
@@ -407,6 +390,20 @@ public:
         if (n==NIL)return 0;
         return 1 +  max(depth(n->left), depth(n->right));
     }
+    int maximize()
+    {
+           maximize(root);
+    }
+
+   int maximize(Node* n)
+   {
+         if(n==NIL)
+            return 0;
+         
+          n->maxi=max(maximize(n->right),max(maximize(n->left),n->high));
+          return n->maxi;
+   }
+
 };
 
 int main (){
@@ -418,12 +415,16 @@ int main (){
     RedBlackTree  rbt;
     for(int i=0; i<6; i++)
     rbt.insert(ints[i].start,ints[i].end);
-     
+      rbt.maximize();
+     rbt.print();
      cin>>x; // interval to be deleted from ints;
-    rbt.indelete(ints[x].start);
-    rbt.print();
-    rbt.search(5 ,6);
+
+    rbt.indelete(ints[5].start);
     
+    rbt.maximize();
+    rbt.search(14 ,16);
+    rbt.search(21,23);
+    rbt.print();
     cout<<rbt.depth()<<endl;
     cin.get();
     return 0;
