@@ -1,7 +1,5 @@
 #include <iostream>
-
 using namespace std;
-
 int const RED = 1;
 int const BLACK = 2;
 struct Interval {
@@ -10,20 +8,17 @@ struct Interval {
       Interval() : start(0), end(0) {}
       Interval(int s, int e) : start(s), end(e) {}
   };
-template <typename KEY, typename VALUE>
 class RedBlackTree {
 public:
     struct Node{
-        KEY key;
-        VALUE value;
+        int low;
+        int high;
         Node *left, *right, *parent;
         int color;
         int  maxi;
-
-        
-        Node (KEY k, VALUE v){
-            key = k;
-            value = v;
+        Node (int k, int v){
+            low = k;
+            high = v;
             left = right = parent = NULL;
             color = RED;
              maxi=0;
@@ -49,8 +44,8 @@ public:
         delete (NIL);
     }
     
-    void insert (KEY key, VALUE value){
-        now = new Node (key, value);
+    void insert (int low, int high){
+        now = new Node (low, high);
         now->left = now->right = now->parent = NIL;
         
         x = root;
@@ -58,16 +53,16 @@ public:
         
         while (x!=NIL){
             y = x;
-            if (now->key < x->key){
+            if (now->low < x->low){
                    
                 x = x->left;
             }
-            else if (now->key > x->key) {
+            else if (now->low > x->low) {
       
                 x = x->right;
             }
             else{
-                x->value = value;
+                x->high = high;
 
                 return ;
             }
@@ -75,17 +70,17 @@ public:
         
         if (y==NIL){
             root = now;
-            root-> maxi= now->value;
+            root-> maxi= now->high;
         }
-        else if (now->key <  y->key){
+        else if (now->low <  y->low){
                 y->left = now;
-                now-> maxi=now->value;
+                now-> maxi=now->high;
                 if(now-> maxi>y-> maxi)
                  y-> maxi=now-> maxi;
         }
         else{
             y->right = now;
-            now-> maxi=now->value;
+            now-> maxi=now->high;
              if(now-> maxi>y-> maxi)
                  y-> maxi=now-> maxi;
         }
@@ -95,7 +90,8 @@ public:
         insert_fix(now);
     }
     
-    void print (){
+    void print ()   // print the interval tree 
+    {
         print (root);
         cout<<endl;
     }
@@ -104,13 +100,14 @@ public:
         if (n == NIL)return;
         print (n->left);
 
-        cout<<n->key<<" "<<n->value<<" "<<n->color<<" "<<n->maxi<<endl;
+        cout<<n->low<<" "<<n->high<<" "<<n->color<<" "<<n->maxi<<endl;
 
 
         print (n->right);
     }
     
-    void clear(){
+    void clear()
+    {
         clear(root);
         root = NIL;
     }
@@ -122,20 +119,28 @@ public:
         delete (n);
     }
     
-    Node* search (KEY key){
+     void search (int l ,int h ){
         x = root;
         
-        while (x!=NIL){
-            if (key < x->key){
+        while (x!=NIL)
+        {
+            if(x->low<=h&& l<=x->high)
+               {
+                 cout<<"Overlaps with"<<x->low<<","<<x->high<<endl;
+                 return;
+                 
+               }
+            if (x->left!=NIL && x->left->maxi>=l){
                 x = x->left;
             }
-            else if (key > x->key){
+            else {
                 x = x->right;
             }
-            else break;
+            
         }
+          if(x==NIL)
+          cout<<"No overlap";
         
-        return x;
     }
     
     void left_rotate(Node *x){
@@ -167,7 +172,7 @@ public:
             x->right-> maxi=0;
           if(x->left==NIL)
             x->left-> maxi=0;
-            x-> maxi= max(x->value, max(x->right-> maxi,x->left-> maxi));
+            x-> maxi= max(x->high, max(x->right-> maxi,x->left-> maxi));
           if(x-> maxi>y-> maxi)
             y-> maxi=x-> maxi;
 
@@ -199,7 +204,7 @@ public:
             y->right-> maxi=0;
           if(y->left==NIL)
             y->left-> maxi=0;
-            y-> maxi= max(y->value, max(y->right-> maxi,y->left-> maxi));
+            y-> maxi= max(y->high, max(y->right-> maxi,y->left-> maxi));
           if(x-> maxi<y-> maxi)
             x-> maxi=y-> maxi;
     }
@@ -260,14 +265,16 @@ int main (){
     Interval ints[6] = {{15, 20}, {10, 30}, {17, 19},
         {5, 20}, {12, 15}, {30, 40}};
     
-    RedBlackTree <int,int > rbt;
+    RedBlackTree  rbt;
     for(int i=0; i<6; i++)
     rbt.insert(ints[i].start,ints[i].end);
    
     
     rbt.print();
+    rbt.search(5 ,6);
     
     cout<<rbt.depth()<<endl;
     cin.get();
     return 0;
 }
+//hbhbhbhb;
