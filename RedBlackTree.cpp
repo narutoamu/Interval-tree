@@ -1,3 +1,6 @@
+/*input
+0
+*/
 #include <iostream>
 using namespace std;
 int const RED = 1;
@@ -30,7 +33,7 @@ public:
             maxi=0;
         }
         
-    } *root, *x, *y, *now;
+    } *root, *x, *y, *now, *Z,*w;
     
     Node *NIL;
     
@@ -89,7 +92,72 @@ public:
         now->parent = y;
         insert_fix(now);
     }
-    
+    Node* ndsearch( int k) 
+    {
+              x=root;
+        while(x!=NIL)
+        {
+        if (x->low == k)
+            return x;
+          
+        if (k < root->low)
+            x=x->left;
+        else
+            x=x->right;
+        }
+        if(x==NIL)
+            return x;
+    }
+    // deletion of interval Tree
+    void rbtransplant( Node *u, Node *v) 
+    {
+        if (u->parent == NIL)
+            root = v;
+        else if (u == u->parent->left)
+            u->parent->left = v;
+        else
+            u->parent->right = v;
+        v->parent = u->parent;
+   }
+
+    void indelete( int z) 
+    {
+         Z = ndsearch(z);
+        if (Z== NIL) {
+            cout<<"Node to be deleted not found\n";
+            return;
+        }
+        
+         y = Z;
+        int yoc = y->color;
+          
+        if (Z->left == NIL) {
+            x = Z->right;
+            rbtransplant(Z,Z->right);
+        }
+        else if (Z->right == NIL) {
+            x = Z->left;
+            rbtransplant(Z,Z->left);
+        }
+        else {
+            y = minimum(Z->right);
+            yoc = y->color;
+            x = y->right;
+            if (y->parent == Z)
+                x->parent = y;
+            else {
+                rbtransplant(y,y->right);
+                y->right = Z->right;
+                y->right->parent = y;
+            }
+            rbtransplant(Z,y);
+            y->left = Z->left;
+            y->left->parent = y;
+            y->color = Z->color;
+        }
+        if (yoc == BLACK)
+            rbdeletefixup(x);
+    }
     void print ()   // print the interval tree 
     {
         print (root);
@@ -118,7 +186,19 @@ public:
         clear (n->right);
         delete (n);
     }
-    
+    Node* minimum(Node*e)
+    {
+    while (e->left != NIL)
+        e = e->left;
+    return e;
+    }
+ 
+    Node* maximum(Node* e) 
+    {
+    while (e->right != NIL)
+        e = e->right;
+    return e;
+    }
      void search (int l ,int h ){
         x = root;
         
@@ -176,7 +256,8 @@ public:
           if(x-> maxi>y-> maxi)
             y-> maxi=x-> maxi;
 
-    }
+     }
+
     
     // copy from left_rotate but change x to y, left to right and vice versa
     void right_rotate(Node *y){
@@ -248,6 +329,75 @@ public:
         }
         root->color = BLACK;
     }
+    void rbdeletefixup(Node *x)
+    {
+     while (x != root && x->color == BLACK)
+      {
+        if (x == x->parent->left) 
+        {
+             w = x->parent->right;
+            if (w->color == RED) 
+            {
+                w->color = BLACK;
+                x->parent->color = RED;
+                left_rotate(x->parent);
+                w = x->parent->right;
+            }
+            if (w->left->color == BLACK && w->right->color == BLACK) 
+            {
+                w->color = RED;
+                x = x->parent;
+            }
+            else 
+            {
+                if (w->right->color == BLACK)
+                 {
+                    w->left->color = BLACK;
+                    w->color = RED;
+                    right_rotate(w);
+                    w = x->parent->right;
+                 }
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->right->color = BLACK;
+                left_rotate(x->parent);
+                x = root;
+            }
+        }
+        else
+        {
+              w = x->parent->left;
+            if(w->color == RED) 
+            { 
+                w->color = BLACK;
+                x->parent->color = RED;
+                right_rotate(x->parent);
+                w = x->parent->left;
+            }
+            if(w->left->color == BLACK && w->right->color == BLACK) 
+            {
+                w->color = RED;
+                x = x->parent;
+            }
+            else 
+            {
+                if(w->left->color == BLACK)
+                 {
+                    w->right->color = BLACK;
+                    w->color = RED;
+                    left_rotate(w);
+                    w = x->parent->left;
+                 }
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->left->color = BLACK;
+                right_rotate(x->parent);
+                x = root;
+            }
+        }
+      }
+        x->color = BLACK;
+    }
     
     int depth(){
         return depth(root);
@@ -264,12 +414,13 @@ int main (){
     
     Interval ints[6] = {{15, 20}, {10, 30}, {17, 19},
         {5, 20}, {12, 15}, {30, 40}};
-    
+    int x;
     RedBlackTree  rbt;
     for(int i=0; i<6; i++)
     rbt.insert(ints[i].start,ints[i].end);
-   
-    
+     
+     cin>>x; // interval to be deleted from ints;
+    rbt.indelete(ints[x].start);
     rbt.print();
     rbt.search(5 ,6);
     
